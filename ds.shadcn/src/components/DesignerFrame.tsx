@@ -5,6 +5,7 @@ import { LayerWithStyles } from "../types";
 export const DesignerFrame = () => {
   const { state, dispatch } = useContext(DesignerContext);
   const [dragging, setDragging] = useState<string | null>(null);
+  const [resizing, setResizing] = useState<string | null>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const handleLayerClick = (layerId: string) => {
@@ -28,6 +29,14 @@ export const DesignerFrame = () => {
     }
   };
 
+  const handleResizeMouseDown = (
+    e: React.MouseEvent<HTMLDivElement>,
+    layerId: string
+  ) => {
+    e.stopPropagation();
+    setResizing(layerId);
+  };
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (dragging) {
       const newX = e.clientX - offset.x;
@@ -43,10 +52,32 @@ export const DesignerFrame = () => {
         },
       });
     }
+    if (resizing) {
+      const layer = state.layers.find((l) => l.id === resizing);
+      if (layer) {
+        const newWidth =
+          e.clientX -
+          (parseInt(layer.cssVars?.["--translate-x"] || "0", 10) || 0);
+        const newHeight =
+          e.clientY -
+          (parseInt(layer.cssVars?.["--translate-y"] || "0", 10) || 0);
+        dispatch({
+          type: "UPDATE_LAYER_CSS",
+          payload: {
+            id: resizing,
+            css: {
+              "--width": `${newWidth}px`,
+              "--height": `${newHeight}px`,
+            },
+          },
+        });
+      }
+    }
   };
 
   const handleMouseUp = () => {
     setDragging(null);
+    setResizing(null);
   };
 
   return (
@@ -95,6 +126,14 @@ export const DesignerFrame = () => {
             onMouseDown={(e) => handleMouseDown(e, layer.id)}
           >
             {layerType.render(layerWithStyles)}
+            {isSelected && (
+              <>
+                <div
+                  className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white rounded-full cursor-se-resize"
+                  onMouseDown={(e) => handleResizeMouseDown(e, layer.id)}
+                />
+              </>
+            )}
           </div>
         );
       })}
