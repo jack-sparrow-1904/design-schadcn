@@ -1,17 +1,47 @@
 import { createContext, Dispatch, ReactNode, useReducer } from "react";
-import { Layer } from "../types";
+import { Layer, LayerType } from "../types";
+import { DEFAULT_LAYER_TYPES } from "../layerTypes";
 
 export type State = {
   layers: Layer[];
+  layerTypes: LayerType[];
+  selectedLayers: string[];
 };
 
-export type Action = {
-  type: "ADD_LAYER";
-  payload: Layer;
-};
+export type Action =
+  | {
+      type: "ADD_LAYER";
+      payload: Layer;
+    }
+  | {
+      type: "SELECT_LAYER";
+      payload: string;
+    }
+  | {
+      type: "UPDATE_LAYER_CSS";
+      payload: {
+        id: string;
+        css: Record<string, string>;
+      };
+    };
 
 const initialState: State = {
-  layers: [],
+  layers: [
+    {
+      id: "1",
+      type: "text",
+      name: "Text 1",
+      value: "Hello World",
+      cssVars: {
+        "--width": "200px",
+        "--height": "100px",
+        "--translate-x": "100px",
+        "--translate-y": "100px",
+      },
+    },
+  ],
+  layerTypes: DEFAULT_LAYER_TYPES,
+  selectedLayers: [],
 };
 
 const reducer = (state: State, action: Action): State => {
@@ -20,6 +50,26 @@ const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         layers: [...state.layers, action.payload],
+      };
+    case "SELECT_LAYER":
+      return {
+        ...state,
+        selectedLayers: [action.payload],
+      };
+    case "UPDATE_LAYER_CSS":
+      return {
+        ...state,
+        layers: state.layers.map((layer) =>
+          layer.id === action.payload.id
+            ? {
+                ...layer,
+                cssVars: {
+                  ...layer.cssVars,
+                  ...action.payload.css,
+                },
+              }
+            : layer
+        ),
       };
     default:
       return state;
