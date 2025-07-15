@@ -1,15 +1,16 @@
-import { useContext } from "react";
-import { DesignerContext } from "../contexts/DesignerContext";
+import { useDesignerContext } from "../hooks/useDesignerContext";
+import { useDesignerAction } from "../hooks/useDesignerAction";
 
 export const ActionToolbarHistory = () => {
-  const { state, dispatch } = useContext(DesignerContext);
+  const { state } = useDesignerContext();
+  const designerAction = useDesignerAction();
 
   const handleUndo = () => {
-    dispatch({ type: "UNDO" });
+    designerAction({ type: "UNDO" });
   };
 
   const handleRedo = () => {
-    dispatch({ type: "REDO" });
+    designerAction({ type: "REDO" });
   };
 
   return (

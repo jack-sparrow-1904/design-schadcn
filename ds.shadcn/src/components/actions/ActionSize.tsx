@@ -1,15 +1,14 @@
-import { useContext } from "react";
-import { DesignerContext } from "../../contexts/DesignerContext";
+import { useSelectedLayers } from "../../hooks/useSelectedLayers";
+import { useDesignerAction } from "../../hooks/useDesignerAction";
 
 export const ActionSize = () => {
-  const { state, dispatch } = useContext(DesignerContext);
-  const selectedLayer = state.layers.find(
-    (layer) => layer.id === state.selectedLayers[0]
-  );
+  const selectedLayers = useSelectedLayers();
+  const designerAction = useDesignerAction();
+  const selectedLayer = selectedLayers[0];
 
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (selectedLayer) {
-      dispatch({
+      designerAction({
         type: "UPDATE_LAYER_CSS",
         payload: {
           id: selectedLayer.id,
@@ -21,7 +20,7 @@ export const ActionSize = () => {
 
   const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (selectedLayer) {
-      dispatch({
+      designerAction({
         type: "UPDATE_LAYER_CSS",
         payload: {
           id: selectedLayer.id,

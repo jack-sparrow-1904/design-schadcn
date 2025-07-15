@@ -1,11 +1,10 @@
-import { useContext } from "react";
-import { DesignerContext } from "../contexts/DesignerContext";
+import { useDesignerAction } from "../hooks/useDesignerAction";
 
 export const ActionToolbarAddLayer = () => {
-  const { dispatch } = useContext(DesignerContext);
+  const designerAction = useDesignerAction();
 
   const addLayer = () => {
-    dispatch({
+    designerAction({
       type: "ADD_LAYER",
       payload: {
         id: new Date().getTime().toString(),

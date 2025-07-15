@@ -1,9 +1,11 @@
-import { useContext, useState } from "react";
-import { DesignerContext } from "../contexts/DesignerContext";
+import { useState } from "react";
+import { useDesignerContext } from "../hooks/useDesignerContext";
+import { useLayers } from "../hooks/useLayers";
 import { LayerWithStyles } from "../types";
 
 export const DesignerFrame = () => {
-  const { state, dispatch } = useContext(DesignerContext);
+  const { state, dispatch } = useDesignerContext();
+  const layers = useLayers();
   const [dragging, setDragging] = useState<string | null>(null);
   const [resizing, setResizing] = useState<string | null>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -17,7 +19,7 @@ export const DesignerFrame = () => {
     layerId: string
   ) => {
     setDragging(layerId);
-    const layer = state.layers.find((l) => l.id === layerId);
+    const layer = layers.find((l) => l.id === layerId);
     if (layer) {
       const x =
         e.clientX -
@@ -53,7 +55,7 @@ export const DesignerFrame = () => {
       });
     }
     if (resizing) {
-      const layer = state.layers.find((l) => l.id === resizing);
+      const layer = layers.find((l) => l.id === resizing);
       if (layer) {
         const newWidth =
           e.clientX -
@@ -93,7 +95,7 @@ export const DesignerFrame = () => {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
-      {state.layers.map((layer) => {
+      {layers.map((layer) => {
         const layerType = state.layerTypes.find((lt) => lt.type === layer.type);
         if (!layerType) {
           return null;
