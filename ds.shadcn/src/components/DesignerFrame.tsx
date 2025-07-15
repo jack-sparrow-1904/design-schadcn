@@ -10,8 +10,9 @@ export const DesignerFrame = () => {
   const [resizing, setResizing] = useState<string | null>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
-  const handleLayerClick = (layerId: string) => {
-    dispatch({ type: "SELECT_LAYER", payload: layerId });
+  const handleLayerClick = (e: React.MouseEvent<HTMLDivElement>, layerId: string) => {
+    e.stopPropagation();
+    dispatch({ type: "SELECT_LAYER", payload: { layerId, shiftKey: e.shiftKey } });
   };
 
   const handleMouseDown = (
@@ -124,7 +125,7 @@ export const DesignerFrame = () => {
           <div
             key={layer.id}
             style={layerWithStyles.style}
-            onClick={() => handleLayerClick(layer.id)}
+            onClick={(e) => handleLayerClick(e, layer.id)}
             onMouseDown={(e) => handleMouseDown(e, layer.id)}
           >
             {layerType.render(layerWithStyles)}

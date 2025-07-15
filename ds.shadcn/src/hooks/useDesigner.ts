@@ -26,6 +26,14 @@ export type State = {
    * The current index in the history.
    */
   historyIndex: number;
+  /**
+   * The zoom level of the canvas.
+   */
+  zoom: number;
+  /**
+   * The pan offset of the canvas.
+   */
+  pan: { x: number; y: number };
 };
 
 /**
@@ -38,7 +46,7 @@ export type Action =
     }
   | {
       type: "SELECT_LAYER";
-      payload: string;
+      payload: { layerId: string; shiftKey: boolean };
     }
   | {
       type: "UPDATE_LAYER_CSS";
@@ -56,7 +64,9 @@ export type Action =
     }
   | { type: "UNDO" }
   | { type: "REDO" }
-  | { type: "SET_LAYERS"; payload: Layer[] };
+  | { type: "SET_LAYERS"; payload: Layer[] }
+  | { type: "SET_ZOOM"; payload: number }
+  | { type: "SET_PAN"; payload: { x: number; y: number } };
 
 const initialState: State = {
   layers: [],
@@ -64,6 +74,8 @@ const initialState: State = {
   selectedLayers: [],
   history: [],
   historyIndex: -1,
+  zoom: 1,
+  pan: { x: 0, y: 0 },
 };
 
 const reducer = (state: State, action: Action): State => {
@@ -81,11 +93,27 @@ const reducer = (state: State, action: Action): State => {
       ];
       return { ...newState, history: newHistory, historyIndex: newHistory.length - 1 };
     }
-    case "SELECT_LAYER":
-      return {
-        ...state,
-        selectedLayers: [action.payload],
-      };
+    case "SELECT_LAYER": {
+      const { layerId, shiftKey } = action.payload;
+      if (shiftKey) {
+        if (state.selectedLayers.includes(layerId)) {
+          return {
+            ...state,
+            selectedLayers: state.selectedLayers.filter((id) => id !== layerId),
+          };
+        } else {
+          return {
+            ...state,
+            selectedLayers: [...state.selectedLayers, layerId],
+          };
+        }
+      } else {
+        return {
+          ...state,
+          selectedLayers: [layerId],
+        };
+      }
+    }
     case "UPDATE_LAYER_CSS": {
       const newState = {
         ...state,
@@ -147,6 +175,10 @@ const reducer = (state: State, action: Action): State => {
       }
       return state;
     }
+    case "SET_ZOOM":
+      return { ...state, zoom: action.payload };
+    case "SET_PAN":
+      return { ...state, pan: action.payload };
     default:
       return state;
   }

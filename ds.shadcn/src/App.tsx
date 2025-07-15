@@ -11,6 +11,9 @@ import { ActionPosition } from "./components/actions/ActionPosition";
 import { ActionToolbarHistory } from "./components/ActionToolbarHistory";
 import { ActionSize } from "./components/actions/ActionSize";
 import { ActionImage } from "./components/actions/ActionImage";
+import { PaneLayerTree } from "./components/PaneLayerTree";
+import { ActionFill } from "./components/actions/ActionFill";
+import { ActionColor } from "./components/actions/ActionColor";
 import "./index.css";
 
 const initialLayers = [
@@ -33,6 +36,11 @@ function App() {
     <div className="h-screen">
       <Designer defaultLayers={initialLayers}>
         <DesignerContent>
+          <DesignerPanel>
+            <DesignerPane title="Layers">
+              <PaneLayerTree />
+            </DesignerPane>
+          </DesignerPanel>
           <DesignerCanvas>
             <DesignerFrame />
           </DesignerCanvas>
@@ -45,6 +53,12 @@ function App() {
             </DesignerPane>
             <DesignerPane title="Image" showForLayerTypes={["image"]}>
               <ActionImage />
+            </DesignerPane>
+            <DesignerPane title="Fill" showForLayerTypes={["text", "image"]}>
+              <ActionFill />
+            </DesignerPane>
+            <DesignerPane title="Color" showForLayerTypes={["text"]}>
+              <ActionColor />
             </DesignerPane>
           </DesignerPanel>
         </DesignerContent>
