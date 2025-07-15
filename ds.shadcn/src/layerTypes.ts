@@ -17,5 +17,12 @@ export const DEFAULT_LAYER_TYPES: LayerType[] = [
     render: (layer) => (
       <div style={layer.contentStyle}>{layer.value}</div>
     ),
+    keybinding: {
+      key: "t",
+      label: "T",
+      labelMac: "T",
+      description: "Add Text Layer",
+      group: "Layer",
+    },
   },
 ];

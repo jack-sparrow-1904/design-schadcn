@@ -1,4 +1,10 @@
-import { createContext, Dispatch, ReactNode, useReducer } from "react";
+import {
+  createContext,
+  Dispatch,
+  ReactNode,
+  useReducer,
+  useEffect,
+} from "react";
 import { Layer, LayerType } from "../types";
 import { DEFAULT_LAYER_TYPES } from "../layerTypes";
 
@@ -27,23 +33,11 @@ export type Action =
       };
     }
   | { type: "UNDO" }
-  | { type: "REDO" };
+  | { type: "REDO" }
+  | { type: "SET_LAYERS"; payload: Layer[] };
 
 const initialState: State = {
-  layers: [
-    {
-      id: "1",
-      type: "text",
-      name: "Text 1",
-      value: "Hello World",
-      cssVars: {
-        "--width": "200px",
-        "--height": "100px",
-        "--translate-x": "100px",
-        "--translate-y": "100px",
-      },
-    },
-  ],
+  layers: [],
   layerTypes: DEFAULT_LAYER_TYPES,
   selectedLayers: [],
   history: [],
@@ -52,13 +46,18 @@ const initialState: State = {
 
 const reducer = (state: State, action: Action): State => {
   switch (action.type) {
+    case "SET_LAYERS":
+      return { ...state, layers: action.payload };
     case "ADD_LAYER": {
       const newState = {
         ...state,
         layers: [...state.layers, action.payload],
       };
-      const newHistory = [...state.history.slice(0, state.historyIndex + 1), state];
-      return { ...newState, history: newHistory, historyIndex: newHistory.length -1};
+      const newHistory = [
+        ...state.history.slice(0, state.historyIndex + 1),
+        state,
+      ];
+      return { ...newState, history: newHistory, historyIndex: newHistory.length - 1 };
     }
     case "SELECT_LAYER":
       return {
@@ -80,20 +79,31 @@ const reducer = (state: State, action: Action): State => {
             : layer
         ),
       };
-      const newHistory = [...state.history.slice(0, state.historyIndex + 1), state];
-      return { ...newState, history: newHistory, historyIndex: newHistory.length -1};
+      const newHistory = [
+        ...state.history.slice(0, state.historyIndex + 1),
+        state,
+      ];
+      return { ...newState, history: newHistory, historyIndex: newHistory.length - 1 };
     }
     case "UNDO": {
       if (state.historyIndex > 0) {
         const newIndex = state.historyIndex - 1;
-        return { ...state.history[newIndex], history: state.history, historyIndex: newIndex };
+        return {
+          ...state.history[newIndex],
+          history: state.history,
+          historyIndex: newIndex,
+        };
       }
       return state;
     }
     case "REDO": {
       if (state.historyIndex < state.history.length - 1) {
         const newIndex = state.historyIndex + 1;
-        return { ...state.history[newIndex], history: state.history, historyIndex: newIndex };
+        return {
+          ...state.history[newIndex],
+          history: state.history,
+          historyIndex: newIndex,
+        };
       }
       return state;
     }
@@ -110,8 +120,35 @@ export const DesignerContext = createContext<{
   dispatch: () => null,
 });
 
-export const DesignerProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+type DesignerProviderProps = {
+  children: ReactNode;
+  defaultLayers?: Layer[];
+  layers?: Layer[];
+  onLayersChange?: (layers: Layer[]) => void;
+};
+
+export const DesignerProvider = ({
+  children,
+  defaultLayers,
+  layers,
+  onLayersChange,
+}: DesignerProviderProps) => {
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    layers: defaultLayers || layers || [],
+  });
+
+  useEffect(() => {
+    if (layers) {
+      dispatch({ type: "SET_LAYERS", payload: layers });
+    }
+  }, [layers]);
+
+  useEffect(() => {
+    if (onLayersChange) {
+      onLayersChange(state.layers);
+    }
+  }, [state.layers, onLayersChange]);
 
   return (
     <DesignerContext.Provider value={{ state, dispatch }}>
