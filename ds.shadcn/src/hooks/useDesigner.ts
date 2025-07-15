@@ -47,6 +47,13 @@ export type Action =
         css: Record<string, string>;
       };
     }
+  | {
+      type: "UPDATE_LAYER_VALUE";
+      payload: {
+        id: string;
+        value: string;
+      };
+    }
   | { type: "UNDO" }
   | { type: "REDO" }
   | { type: "SET_LAYERS"; payload: Layer[] };
@@ -90,6 +97,24 @@ const reducer = (state: State, action: Action): State => {
                   ...layer.cssVars,
                   ...action.payload.css,
                 },
+              }
+            : layer
+        ),
+      };
+      const newHistory = [
+        ...state.history.slice(0, state.historyIndex + 1),
+        state,
+      ];
+      return { ...newState, history: newHistory, historyIndex: newHistory.length - 1 };
+    }
+    case "UPDATE_LAYER_VALUE": {
+      const newState = {
+        ...state,
+        layers: state.layers.map((layer) =>
+          layer.id === action.payload.id
+            ? {
+                ...layer,
+                value: action.payload.value,
               }
             : layer
         ),

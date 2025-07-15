@@ -10,6 +10,7 @@ import { DesignerPane } from "./components/DesignerPane";
 import { ActionPosition } from "./components/actions/ActionPosition";
 import { ActionToolbarHistory } from "./components/ActionToolbarHistory";
 import { ActionSize } from "./components/actions/ActionSize";
+import { ActionImage } from "./components/actions/ActionImage";
 import "./index.css";
 
 const initialLayers = [
@@ -41,6 +42,9 @@ function App() {
             </DesignerPane>
             <DesignerPane title="Size">
               <ActionSize />
+            </DesignerPane>
+            <DesignerPane title="Image" showForLayerTypes={["image"]}>
+              <ActionImage />
             </DesignerPane>
           </DesignerPanel>
         </DesignerContent>
